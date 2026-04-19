@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Contact Search</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="container">
+    <h1>📱 Smart Contact Search</h1>
+
+    <!-- Add Contact -->
+    <div class="card">
+        <h2>Add Contact</h2>
+        <input type="text" id="name" placeholder="Enter Name">
+        <input type="text" id="phone" placeholder="Enter Phone">
+        <button onclick="addContact()">Add</button>
+    </div>
+
+    <!-- Search -->
+    <div class="card">
+        <h2>Search Contact</h2>
+        <input type="text" id="searchName" placeholder="Enter Name">
+        <button onclick="searchContact()">Search</button>
+    </div>
+
+    <!-- Result -->
+    <div class="card result">
+        <h2>Result</h2>
+        <p id="output">No search yet</p>
+    </div>
+</div>
+
+<script>
+function addContact() {
+    let name = document.getElementById("name").value;
+    let phone = document.getElementById("phone").value;
+
+    if (!name || !phone) {
+        alert("Please fill all fields");
+        return;
+    }
+
+    fetch('/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name, phone})
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        document.getElementById("name").value = "";
+        document.getElementById("phone").value = "";
+    });
+}
+
+function searchContact() {
+    let name = document.getElementById("searchName").value;
+
+    if (!name) {
+        alert("Enter name to search");
+        return;
+    }
+
+    fetch('/search', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name})
+    })
+    .then(res => res.json())
+    .then(data => {
+        let output = document.getElementById("output");
+
+        if (data.result) {
+            output.innerHTML = `
+                <b>Name:</b> ${data.result.name}<br>
+                <b>Phone:</b> ${data.result.phone}<br><br>
+                ⏱ Linear Search: ${data.linear_time.toFixed(6)} sec<br>
+                ⚡ Binary Search: ${data.binary_time.toFixed(6)} sec<br>
+                🏆 Faster: ${data.faster}
+            `;
+        } else {
+            output.innerHTML = "❌ Contact Not Found";
+        }
+    });
+}
+</script>
+
+</body>
+</html>
